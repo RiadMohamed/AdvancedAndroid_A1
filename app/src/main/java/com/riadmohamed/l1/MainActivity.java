@@ -3,7 +3,10 @@ package com.riadmohamed.l1;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -18,13 +21,21 @@ import androidx.core.app.NotificationCompat;
 
 public class MainActivity extends AppCompatActivity {
 
+    // MARK: - UI Elements
+
     private Button button_notify;
     private Button button_cancel;
     private Button button_update;
 
+    // MARK: - Constants
     private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
-    private NotificationManager mNotifyManager;
     private static final int NOTIFICATION_ID = 0;
+    private static final String ACTION_UPDATE_NOTIFICATION = "com.example.android.notifyme.ACTION_UPDATE_NOTIFICATION";
+
+
+    // MARK: - Properties
+    private NotificationManager mNotifyManager;
+    private NotificationReceiver mReceiver = new NotificationReceiver();
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -32,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        registerReceiver(mReceiver,new IntentFilter(ACTION_UPDATE_NOTIFICATION));
         button_notify = findViewById(R.id.notify);
         button_notify.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,6 +70,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         setNotificationButtonState(true, false, false);
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mReceiver);
+        super.onDestroy();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -93,6 +111,10 @@ public class MainActivity extends AppCompatActivity {
         NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
         mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());
         setNotificationButtonState(false, true, true);
+        Intent updateIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
+        PendingIntent updatePendingIntent = PendingIntent.getBroadcast
+                (this, NOTIFICATION_ID, updateIntent, PendingIntent.FLAG_ONE_SHOT);
+        notifyBuilder.addAction(R.drawable.ic_update, "Update Notification", updatePendingIntent);
     }
 
     public void updateNotification() {
@@ -117,6 +139,20 @@ public class MainActivity extends AppCompatActivity {
         button_notify.setEnabled(isNotifyEnabled);
         button_update.setEnabled(isUpdateEnabled);
         button_cancel.setEnabled(isCancelEnabled);
+    }
+
+
+    // MARK: - NotificationReceiver class.
+    public class NotificationReceiver extends BroadcastReceiver {
+
+        public NotificationReceiver() {
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Update the notification
+            updateNotification();
+        }
     }
 
 }
