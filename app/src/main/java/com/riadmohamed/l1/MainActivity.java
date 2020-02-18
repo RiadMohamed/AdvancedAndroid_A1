@@ -113,12 +113,13 @@ public class MainActivity extends AppCompatActivity {
 
     public void sendNotification() {
         NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
-        mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());
-        setNotificationButtonState(false, true, true);
         Intent updateIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
         PendingIntent updatePendingIntent = PendingIntent.getBroadcast
                 (this, NOTIFICATION_ID, updateIntent, PendingIntent.FLAG_ONE_SHOT);
         notifyBuilder.addAction(R.drawable.ic_update, "Update Notification", updatePendingIntent);
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(notifyBuilder);
+        mNotifyManager.notify(NOTIFICATION_ID, inboxStyle.build());
+        setNotificationButtonState(false, true, true);
     }
 
     public void updateNotification() {
@@ -128,7 +129,8 @@ public class MainActivity extends AppCompatActivity {
         notifyBuilder.setStyle(new NotificationCompat.BigPictureStyle()
                 .bigPicture(androidImage)
                 .setBigContentTitle("Notification Updated!"));
-        mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(notifyBuilder);
+        mNotifyManager.notify(NOTIFICATION_ID, inboxStyle.build());
         setNotificationButtonState(false, false, true);
     }
 
