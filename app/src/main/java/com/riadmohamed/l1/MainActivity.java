@@ -95,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
 
     public NotificationCompat.Builder getNotificationBuilder() {
         Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.putExtra("id", 1);
+        PendingIntent swipePendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        notificationIntent.putExtra("id", 2);
         PendingIntent notificationPendingIntent = PendingIntent.getActivity(this,
                 NOTIFICATION_ID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this, PRIMARY_CHANNEL_ID)
@@ -103,7 +106,8 @@ public class MainActivity extends AppCompatActivity {
                 .setSmallIcon(R.drawable.ic_android)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setDefaults(NotificationCompat.DEFAULT_ALL);
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setDeleteIntent(swipePendingIntent);
         return notifyBuilder;
     }
 
@@ -151,7 +155,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Update the notification
-            updateNotification();
+            if (intent.getIntExtra("id", -1) == 1) {
+                updateNotification();
+            } else {
+                cancelNotification();
+            }
         }
     }
 
